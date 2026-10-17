@@ -2,8 +2,9 @@
 # downloadable zip (Actions tab › latest run › Artifacts).
 #
 # Runs on every push to main, on pull requests, and on demand via
-# "Run workflow" in the Actions tab. Built without the optional NDI SDK and
-# ProPresenter types, so those two features show as unavailable in the app.
+# "Run workflow" in the Actions tab. Includes ProPresenter import (types are
+# generated during the build). Built without the optional NDI SDK, so NDI
+# shows as unavailable in the app.
 # The app is ad-hoc signed: on first launch, allow it under
 # System Settings › Privacy & Security › "Open Anyway".
 
@@ -38,14 +39,31 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
+      - name: Install XcodeGen and protoc
+        run: brew install xcodegen protobuf
+
+      # Build protoc-gen-swift at the SwiftProtobuf version ProImport pins, so
+      # the generated code always matches the library it compiles against.
+      - name: Build protoc-gen-swift
+        run: |
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('Packages/ProImport/Package.resolved', 'utf8')).pins.find(p => p.identity === 'swift-protobuf').state.version")
+          git clone -q --depth 1 --branch "$VERSION" https://github.com/apple/swift-protobuf.git "$RUNNER_TEMP/swift-protobuf"
+          swift build -c release --package-path "$RUNNER_TEMP/swift-protobuf" --product protoc-gen-swift
+          echo "$RUNNER_TEMP/swift-protobuf/.build/release" >> "$GITHUB_PATH"
 
       - name: Show tool versions
         run: |
           xcodebuild -version
           xcodegen --version
           node --version
+          protoc --version
+          protoc-gen-swift --version
+
+      - name: Generate ProPresenter types
+        run: scripts/generate-propresenter-proto.sh
+
+      - name: Test ProPresenter import
+        run: swift test --package-path Packages/ProImport --force-resolved-versions
 
       - name: Generate Xcode project
         run: xcodegen generate
