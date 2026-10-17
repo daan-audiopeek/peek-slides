@@ -94,8 +94,8 @@ struct ActionCombosModule: View {
 
     private var addMenu: some View {
         Menu {
-            Button("New Combo") {
-                if let id = model.createActionCombo(name: "New Combo") {
+            Button("New Macro") {
+                if let id = model.createActionCombo(name: "New Macro") {
                     expanded.insert(id)
                 }
             }
@@ -111,7 +111,7 @@ struct ActionCombosModule: View {
         .buttonStyle(.plain)
         .menuIndicator(.hidden)
         .fixedSize()
-        .help("Add a combo or a folder")
+        .help("Add a macro or a folder")
     }
 
     private var filteredList: some View {
@@ -123,7 +123,7 @@ struct ActionCombosModule: View {
                 comboBlock(comboID)
             }
             if ids.isEmpty {
-                Text("No combos match.")
+                Text("No macros match.")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 2)
@@ -142,7 +142,7 @@ struct ActionCombosModule: View {
                         folderPrefix: Self.folderPrefix,
                         isItemID: { comboIDs.contains($0) },
                         updateBoard: model.updateComboBoard,
-                        memberNoun: "combos",
+                        memberNoun: "macros",
                         dropTarget: $dropTarget,
                         editingFolders: $editingFolders
                     ) {
@@ -490,7 +490,7 @@ struct ActionCombosModule: View {
                 }
             }
         case .fireCombo:
-            QuietMenuChip(title: entryName(action.comboId) ?? "Combo\u{2026}") {
+            QuietMenuChip(title: entryName(action.comboId) ?? "Macro\u{2026}") {
                 ForEach(model.actionCombos.filter { $0.id != comboID }, id: \.id) { combo in
                     Button(combo.name) {
                         updateAction(comboID, action.id) { $0.comboId = combo.id }

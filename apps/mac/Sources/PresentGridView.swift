@@ -1865,7 +1865,7 @@ func slideActionLabel(
     case .timerConfigure:
         "Configure Timer: \(timerName(action.timerId))\(configureDetail(action))"
     case .midiOut: "MIDI Out: ch \(action.midiChannel ?? 1)"
-    case .fireCombo: "Run Combo: \(entryName(action.comboId))"
+    case .fireCombo: "Run Macro: \(entryName(action.comboId))"
     case .captureStart: "Start Capture: \(entryName(action.capturePresetId))"
     case .captureStop:
         action.capturePresetId == nil
@@ -2201,6 +2201,59 @@ struct PlaylistFireView: View {
         case .audio: model.audio(track.refId)?.durationSeconds
         case .media: model.media(track.refId)?.durationSeconds
         }
+    }
+}
+
+/// Present-mode view for an overlay picked in the library: a preview with a
+/// Go Live / Take Down button, like MediaFireView does for media.
+struct OverlayFireView: View {
+    let model: AppModel
+    let controls: ServiceControls?
+    let entry: LibraryIndex.Entry
+
+    var body: some View {
+        let isLive = controls?.state.liveOverlays.contains { $0.id == entry.id } ?? false
+        VStack(spacing: 16) {
+            ZStack {
+                Color.black.opacity(0.35)
+                LibraryItemFace(model: model, render: controls?.render, entry: entry)
+            }
+            .aspectRatio(16 / 9, contentMode: .fit)
+            .frame(maxWidth: 640)
+            .clipShape(RoundedRectangle.standard(CornerStandard.element))
+            .overlay {
+                if isLive {
+                    RoundedRectangle.standard(CornerStandard.element)
+                        .strokeBorder(.green, lineWidth: 3)
+                }
+            }
+            HStack(spacing: 8) {
+                Text(entry.name).font(.headline)
+                if isLive {
+                    Text("LIVE")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.green)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(.green.opacity(0.15), in: Capsule())
+                }
+            }
+            Button {
+                if isLive {
+                    controls?.dismissOverlay(id: entry.id)
+                } else if let overlay = model.overlay(entry.id) {
+                    controls?.fire(overlay: overlay)
+                }
+            } label: {
+                Label(isLive ? "Take Down" : "Go Live", systemImage: isLive ? "stop.fill" : "play.fill")
+                    .frame(minWidth: 120)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(isLive ? .red : nil)
+            .keyboardShortcut(.return, modifiers: [])
+            .help(isLive ? "Take this overlay down" : "Go live — persists across slides")
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(24)
     }
 }
 

@@ -54,7 +54,7 @@ final class RecordingController {
     nonisolated static var recordingsFolder: URL {
         let folder = FileManager.default
             .urls(for: .moviesDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("MxU Slides", isDirectory: true)
+            .appendingPathComponent("Peek-Slides", isDirectory: true)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         return folder
     }

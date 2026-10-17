@@ -215,7 +215,7 @@ private struct WorkspaceOptionsView: View {
                 row("Props → Overlays", scan.props, $options.overlays)
                 row("Messages → Alerts", scan.messages, $options.alerts)
                 row("Stage layouts → Confidence", scan.stageLayouts, $options.confidenceLayouts)
-                row("Macros → Action Combos", scan.macros, $options.combos)
+                row("Macros", scan.macros, $options.combos)
                 row("Playlists → Services", scan.playlists, $options.playlists)
                 row("Calendar → Scheduler", scan.calendarEvents, $options.schedules)
                 row("Group hot keys", scan.groupHotKeys, $options.groupHotKeys)
@@ -247,7 +247,7 @@ private struct WorkspaceOptionsView: View {
             }
         }
         .pickerStyle(.radioGroup)
-        Text("“Update unedited” replaces only documents untouched since their last import — anything you've changed in MxU Slides is kept and listed in the report. Nothing here ever changes what's live on your outputs.")
+        Text("“Update unedited” replaces only documents untouched since their last import — anything you've changed in Peek-Slides is kept and listed in the report. Nothing here ever changes what's live on your outputs.")
             .font(.caption)
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
@@ -299,7 +299,7 @@ private struct BackupOptionsView: View {
             }
         }
         .pickerStyle(.radioGroup)
-        Text("“Merge” never loses an edit, so it can't undo one either — to go back to the backup's version of something, choose “Replace”. App settings apply the next time MxU Slides opens. Nothing here ever changes what's live on your outputs.")
+        Text("“Merge” never loses an edit, so it can't undo one either — to go back to the backup's version of something, choose “Replace”. App settings apply the next time Peek-Slides opens. Nothing here ever changes what's live on your outputs.")
             .font(.caption)
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)

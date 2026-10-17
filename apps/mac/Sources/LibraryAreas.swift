@@ -5,6 +5,8 @@ struct FolderNameSheet: View {
     let confirm: String
     var initial = ""
     var error: String?
+    var allowsSlash = false
+    var note: String?
     let submit: (String) async -> Bool
 
     @Environment(\.dismiss) private var dismiss
@@ -13,7 +15,7 @@ struct FolderNameSheet: View {
     @State private var failed = false
 
     private var trimmed: String { name.trimmingCharacters(in: .whitespaces) }
-    private var valid: Bool { !trimmed.isEmpty && !trimmed.contains("/") && trimmed != initial && !working }
+    private var valid: Bool { !trimmed.isEmpty && (allowsSlash || !trimmed.contains("/")) && trimmed != initial && !working }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -22,9 +24,11 @@ struct FolderNameSheet: View {
             TextField("Name", text: $name)
                 .textFieldStyle(.roundedBorder)
                 .onSubmit(save)
-            Text(failed ? (error ?? "That didn't work") : "A name can't contain a slash.")
-                .font(.caption)
-                .foregroundStyle(failed ? AnyShapeStyle(.red) : AnyShapeStyle(.secondary))
+            if failed || !allowsSlash || note != nil {
+                Text(failed ? (error ?? "That didn't work") : note ?? "A name can't contain a slash.")
+                    .font(.caption)
+                    .foregroundStyle(failed ? AnyShapeStyle(.red) : AnyShapeStyle(.secondary))
+            }
             HStack {
                 Spacer()
                 Button("Cancel") { dismiss() }

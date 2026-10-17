@@ -10,6 +10,7 @@ struct LibrarySidebar: View {
     var render: RenderContext?
 
     @AppStorage("appMode") private var appModeRaw = AppMode.edit.rawValue
+    @AppStorage("media.directFire") private var directMediaFire = false
 
     @State private var folderPath: [String]? = []
 
@@ -121,6 +122,7 @@ struct LibrarySidebar: View {
         .sheet(isPresented: $creatingFolder) {
             NewFolderSheet(model: model, entry: nil, parentPath: realPath(folderPath ?? []))
         }
+        .onChange(of: model.selectedEntryIDs) { _, ids in fireDirectMedia(ids) }
         .sheet(item: $folderRenameTarget) { target in
             FolderNameSheet(
                 title: "Rename Folder", confirm: "Rename",
@@ -131,13 +133,16 @@ struct LibrarySidebar: View {
                 return true
             }
         }
-        .alert("Rename", isPresented: renameActive) {
-            TextField("Name", text: $renameText)
-            Button("Rename") {
-                if let target = renameTarget { model.rename(target, to: renameText) }
-                renameTarget = nil
+        // A sheet rather than an alert: a macOS alert's TextField can commit
+        // its edit after the button action runs, renaming to the stale text.
+        .sheet(isPresented: renameActive) {
+            FolderNameSheet(
+                title: "Rename", confirm: "Rename",
+                initial: renameText, allowsSlash: true
+            ) { name in
+                if let target = renameTarget { model.rename(target, to: name) }
+                return true
             }
-            Button("Cancel", role: .cancel) { renameTarget = nil }
         }
         .confirmationDialog(
             deleteBatch.count == 1
@@ -1113,6 +1118,16 @@ struct LibrarySidebar: View {
         }
     }
 
+    /// With Direct Fire on, picking a single media item in present mode
+    /// sends it live at once instead of staging it behind the Fire button.
+    private func fireDirectMedia(_ ids: Set<String>) {
+        guard directMediaFire, appModeRaw == AppMode.present.rawValue,
+              model.selectedSection == .media, ids.count == 1, let id = ids.first,
+              let item = model.media(id), !model.isMediaFileMissing(item)
+        else { return }
+        controls?.fire(mediaItem: item)
+    }
+
     private func showImported(_ id: String) {
         showHome(id)
         if appModeRaw == AppMode.edit.rawValue {
@@ -1198,6 +1213,16 @@ struct LibrarySidebar: View {
                     if isGridMode {
                         thumbnailSizer
                     }
+                }
+                if model.selectedSection == .media {
+                    Toggle(isOn: $directMediaFire) {
+                        Label("Direct Fire", systemImage: "bolt.fill")
+                    }
+                    .toggleStyle(.button)
+                    .tint(directMediaFire ? .orange : nil)
+                    .help(directMediaFire
+                        ? "Direct Fire is on — picking media in Present sends it live at once"
+                        : "Direct Fire — pick media in Present to send it live without pressing Fire")
                 }
                 if model.selectedSection == .media, model.flaggedMediaCount() > 0 {
                     Button {
@@ -1440,7 +1465,7 @@ struct LibraryCommands: Commands {
             summaryLines.append("\(imported.count) of \(summaries.count) themes imported\(mediaCount > 0 ? ", \(mediaCount) media files" : "")")
             for summary in summaries {
                 if let reason = summary.skipped {
-                    warnings.append("△ \(summary.name): kept the copy already here (\(reason == .edited ? "edited in MxU Slides" : "existing"))")
+                    warnings.append("△ \(summary.name): kept the copy already here (\(reason == .edited ? "edited in Peek-Slides" : "existing"))")
                 } else if summary.themeID == nil {
                     warnings.append("✕ \(summary.name): \(summary.warnings.joined(separator: "; "))")
                 } else if !summary.warnings.isEmpty {

@@ -74,19 +74,21 @@ targets:
     info:
       path: Info.plist
       properties:
-        CFBundleName: MxU Slides
-        CFBundleDisplayName: MxU Slides
+        CFBundleName: Peek-Slides
+        CFBundleDisplayName: Peek-Slides
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         MXUGitCommit: "$(MXU_GIT_COMMIT)"
         LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
         LSApplicationCategoryType: public.app-category.video
-        NSLocalNetworkUsageDescription: "MxU Slides uses your local network to discover and receive NDI video sources, and announces its Local API so remotes and control surfaces can find this Mac."
-        NSCameraUsageDescription: "MxU Slides shows cameras and capture devices on your screens as live video inputs."
-        NSMicrophoneUsageDescription: "MxU Slides can include a capture device's audio when it is used as a live input."
+        NSLocalNetworkUsageDescription: "Peek-Slides uses your local network to discover and receive NDI video sources, and announces its Local API so remotes and control surfaces can find this Mac."
+        NSCameraUsageDescription: "Peek-Slides shows cameras and capture devices on your screens as live video inputs."
+        NSMicrophoneUsageDescription: "Peek-Slides can include a capture device's audio when it is used as a live input."
     settings:
       base:
-        PRODUCT_NAME: "MxU Slides"
+        PRODUCT_NAME: "Peek-Slides"
+        # Keep the Swift module name the code was written under.
+        PRODUCT_MODULE_NAME: MxU_Slides
         PRODUCT_BUNDLE_IDENTIFIER: com.example.mxuslides
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MARKETING_VERSION: "0.1.0"
@@ -120,7 +122,7 @@ targets:
     info:
       path: HelperSources/NDIHelper/Info.plist
       properties:
-        CFBundleDisplayName: MxU NDI Helper
+        CFBundleDisplayName: Peek-Slides NDI Helper
         CFBundleShortVersionString: "0.1.0"
         CFBundleVersion: "1"
         XPCService:
@@ -143,7 +145,7 @@ targets:
     info:
       path: HelperSources/DeckLinkHelper/Info.plist
       properties:
-        CFBundleDisplayName: MxU DeckLink Helper
+        CFBundleDisplayName: Peek-Slides DeckLink Helper
         CFBundleShortVersionString: "0.1.0"
         CFBundleVersion: "1"
         XPCService:

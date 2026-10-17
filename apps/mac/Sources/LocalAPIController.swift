@@ -208,8 +208,8 @@ final class LocalAPIController {
 
         resolveDefaultKey()
         let info = APIServerInfo(
-            name: Host.current().localizedName ?? "MxU Slides",
-            product: "MxU Slides",
+            name: Host.current().localizedName ?? "Peek-Slides",
+            product: "Peek-Slides",
             apiVersion: OpenAPIDocument.apiVersion,
             schemaVersion: OpenAPIDocument.documentSchemaVersion()
         )

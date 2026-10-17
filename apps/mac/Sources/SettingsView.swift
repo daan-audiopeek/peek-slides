@@ -383,8 +383,8 @@ struct AppSettingsView: View {
         rows.append(SettingsRowSpec(
             id: "midi.map", category: .midi,
             title: "MIDI input map",
-            caption: "What incoming notes trigger — clears, slides, videos, overlays, media, music, timers, alerts, Action Combos. ProPresenter's stock numbers out of the box; every assignment is editable.",
-            keywords: "midi input map note trigger command clear slide advance timer combo channel propresenter overlay prop playlist media audio music alert message select index",
+            caption: "What incoming notes trigger — clears, slides, videos, overlays, media, music, timers, alerts, macros. ProPresenter's stock numbers out of the box; every assignment is editable.",
+            keywords: "midi input map note trigger command clear slide advance timer combo macro channel propresenter overlay prop playlist media audio music alert message select index",
             control: AnyView(MIDIMapManager())
         ))
 

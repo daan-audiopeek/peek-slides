@@ -13,7 +13,7 @@ struct FeedbackView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(feedback.lastRunCrashed ? "MxU Slides quit unexpectedly" : "Report a Problem")
+            Text(feedback.lastRunCrashed ? "Peek-Slides quit unexpectedly" : "Report a Problem")
                 .font(.title3.weight(.semibold))
             Text(feedback.lastRunCrashed
                 ? "A diagnostics report with the crash log helps track it down. What were you doing when it happened?"
@@ -26,7 +26,7 @@ struct FeedbackView: View {
                 .overlay(RoundedRectangle(cornerRadius: 6).stroke(.quaternary))
             DisclosureGroup("What is included") {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Your note, this Mac's summary below, and the last 7 days of MxU Slides diagnostics: activity breadcrumbs (these can include file and song names), performance samples, and macOS crash reports for this app. No slides, media or passwords.")
+                    Text("Your note, this Mac's summary below, and the last 7 days of Peek-Slides diagnostics: activity breadcrumbs (these can include file and song names), performance samples, and macOS crash reports for this app. No slides, media or passwords.")
                         .fixedSize(horizontal: false, vertical: true)
                     ForEach(feedback.systemInfo(model: model).sorted(by: { $0.key < $1.key }), id: \.key) { row in
                         Text("\(row.key): \(row.value)")

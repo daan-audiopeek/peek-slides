@@ -349,7 +349,7 @@ struct WorkspaceImportRunner {
         if !result.overlaysImported.isEmpty { lines.append("\(result.overlaysImported.count) props → Overlays") }
         if !result.alertsImported.isEmpty { lines.append("\(result.alertsImported.count) messages → Alerts") }
         if !result.layoutsImported.isEmpty { lines.append("\(result.layoutsImported.count) stage layouts → Confidence Layouts") }
-        if !result.combosImported.isEmpty { lines.append("\(result.combosImported.count) macros → Action Combos") }
+        if !result.combosImported.isEmpty { lines.append("\(result.combosImported.count) macros") }
         if !result.timerPlans.isEmpty { lines.append("\(result.timerPlans.count) timers") }
         if inputsImported > 0 { lines.append("\(inputsImported) video inputs") }
         if !result.midiDevicesImported.isEmpty { lines.append("\(result.midiDevicesImported.count) MIDI devices: \(result.midiDevicesImported.joined(separator: ", "))") }
@@ -367,6 +367,6 @@ struct WorkspaceImportRunner {
         }
         activity.finish(summaryLines: lines, warnings: warnings)
 
-        model.noteImportSummary("Workspace import: \(imported.count) presentations, \(result.themesImported.count) themes, \(result.overlaysImported.count) overlays, \(result.alertsImported.count) alerts, \(result.layoutsImported.count) layouts, \(result.combosImported.count) combos, \(result.servicesImported.count) services")
+        model.noteImportSummary("Workspace import: \(imported.count) presentations, \(result.themesImported.count) themes, \(result.overlaysImported.count) overlays, \(result.alertsImported.count) alerts, \(result.layoutsImported.count) layouts, \(result.combosImported.count) macros, \(result.servicesImported.count) services")
     }
 }

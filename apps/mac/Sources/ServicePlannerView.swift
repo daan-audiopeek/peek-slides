@@ -42,6 +42,10 @@ struct RunOrderList: View {
     @State private var selection: Set<String> = []
 
     @State private var rowFrames: [String: CGRect] = [:]
+    // Rows of the hidden section: clicks there must reach their buttons
+    // instead of starting a marquee, but they are not selectable.
+    @State private var hiddenRowFrames: [String: CGRect] = [:]
+    @State private var emptyDropTargeted = false
 
     @State private var marqueeRect: CGRect?
 
@@ -93,18 +97,20 @@ struct RunOrderList: View {
                     model.applyTheme(to: target.presentationID, themeID: themeId, design: design)
                 }
             }
-            .alert("Rename Item", isPresented: renamingItemActive) {
-                TextField("Name", text: $itemRenameText)
-                Button("Rename") {
+            // A sheet rather than an alert: a macOS alert's TextField can
+            // commit its edit after the button action runs.
+            .sheet(isPresented: renamingItemActive) {
+                FolderNameSheet(
+                    title: "Rename Item", confirm: "Rename",
+                    initial: itemRenameText, allowsSlash: true,
+                    note: "This renames the item in the library too — everywhere it's used."
+                ) { name in
                     if let target = renamingItem,
                        let entry = model.indexEntry(target.refId) {
-                        model.rename(entry, to: itemRenameText)
+                        model.rename(entry, to: name)
                     }
-                    renamingItem = nil
+                    return true
                 }
-                Button("Cancel", role: .cancel) { renamingItem = nil }
-            } message: {
-                Text("This renames the item in the library too — everywhere it's used.")
             }
             .sheet(isPresented: $addingFromLibrary) {
                 LibrarySearchSheet(model: model, serviceID: serviceID)
@@ -154,11 +160,13 @@ struct RunOrderList: View {
                 hiddenGroupRow(count: hidden.count)
                     .listRowSeparator(.hidden)
                     .selectionDisabled()
+                    .reportingGlobalFrame(id: "hidden-group", into: $hiddenRowFrames)
                 if showHidden {
                     ForEach(hidden, id: \.id) { item in
                         hiddenRow(item)
                             .listRowSeparator(.hidden)
                             .selectionDisabled()
+                            .reportingGlobalFrame(id: item.id, into: $hiddenRowFrames)
                     }
                 }
             }
@@ -171,11 +179,40 @@ struct RunOrderList: View {
             requestRemoval(order.filter(selection.contains))
         }
         .listMarquee(
-            active: !runOnly, rowFrames: Array(rowFrames.values),
+            active: !runOnly, rowFrames: Array(rowFrames.values) + Array(hiddenRowFrames.values),
             began: marqueeBegan, changed: marqueeChanged, ended: marqueeEnded,
             pressedRow: { rowPressed($0, $1, visible: visible) })
         .inputRegion("run order")
         .overlay { ListMarqueeBand(rect: marqueeRect) }
+        // onInsert needs a row to insert next to, so an empty run order takes
+        // drops from the library here instead.
+        .onDrop(of: visible.isEmpty && !runOnly ? [.plainText, .text] : [], isTargeted: $emptyDropTargeted) { providers in
+            for provider in providers {
+                _ = provider.loadObject(ofClass: NSString.self) { object, _ in
+                    guard let payload = object as? String else { return }
+                    Task { @MainActor in
+                        insertPayload(payload, beforeItemID: nil)
+                    }
+                }
+            }
+            return true
+        }
+        .overlay {
+            if visible.isEmpty && !runOnly {
+                Text("Drag items from the library here")
+                    .font(.callout)
+                    .foregroundStyle(emptyDropTargeted ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.tertiary))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background {
+                        if emptyDropTargeted {
+                            RoundedRectangle(cornerRadius: 6)
+                                .strokeBorder(Color.accentColor.opacity(0.7), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                                .padding(8)
+                        }
+                    }
+                    .allowsHitTesting(false)
+            }
+        }
     }
 
     private func marqueeBegan(_ modifiers: NSEvent.ModifierFlags) {

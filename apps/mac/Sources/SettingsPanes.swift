@@ -927,7 +927,7 @@ private struct MIDIDeviceDetail: View {
                 Button("Remove", role: .destructive) { inventory.remove(item); back() }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("The device is a library item — combos and imports referencing it lose their target. With none left, MIDI Out reaches every destination again.")
+                Text("The device is a library item — macros and imports referencing it lose their target. With none left, MIDI Out reaches every destination again.")
             }
         } else {
             ContentUnavailableView("Device not found", systemImage: "pianokeys")

@@ -51,7 +51,7 @@ struct OnboardingView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Welcome to MxU Slides")
+            Text("Welcome to Peek-Slides")
                 .font(.title2.weight(.semibold))
             HStack(spacing: 14) {
                 ForEach(OnboardingFlow.Step.allCases, id: \.self) { step in

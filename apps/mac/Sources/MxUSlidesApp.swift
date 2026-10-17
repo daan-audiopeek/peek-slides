@@ -177,7 +177,7 @@ struct MxUSlidesApp: App {
 
     var body: some Scene {
 
-        WindowGroup("MxU Slides", id: "main") {
+        WindowGroup("Peek-Slides", id: "main") {
             if let appModel, appModel.libraryOpenError != nil {
 
                 Text("Could not open the library.")

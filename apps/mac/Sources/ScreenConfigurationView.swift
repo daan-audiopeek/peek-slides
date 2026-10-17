@@ -1193,7 +1193,7 @@ private struct SignageDetail: View {
                     .onSubmit { signage.renameChannel(channel.id, to: name) }
                 Spacer()
             }
-            Text("A named loop destination. Give it a media playlist as content and point screens at it below — every screen showing this signage follows content changes. The Set Screen Source action flips the same routing from combos and slides.")
+            Text("A named loop destination. Give it a media playlist as content and point screens at it below — every screen showing this signage follows content changes. The Set Screen Source action flips the same routing from macros and slides.")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

@@ -29,7 +29,7 @@ enum ServiceControlsModule: String, Codable, CaseIterable, Sendable {
         case .tracking: "Service Tracking"
         case .alerts: "Alerts"
         case .overlays: "Overlays"
-        case .combos: "Combos"
+        case .combos: "Macros"
         case .confidence: "Confidence Monitor"
         case .outputs: "Outputs"
         }

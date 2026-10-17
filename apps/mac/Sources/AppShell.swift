@@ -643,22 +643,25 @@ struct ShellView: View {
         .onChange(of: model.selectedEntryID) { _, entryID in
             adoptSelectedService(entryID)
         }
-        .alert(
-            "Rename Service",
+        // A sheet rather than an alert: a TextField inside a macOS alert can
+        // hand its edit to the binding only after the button action has run,
+        // so the rename saved the previously typed name.
+        .sheet(
             isPresented: Binding(
                 get: { renamingServiceID != nil },
                 set: { if !$0 { renamingServiceID = nil } }
             )
         ) {
-            TextField("Name", text: $serviceRenameText)
-            Button("Rename") {
+            FolderNameSheet(
+                title: "Rename Service", confirm: "Rename",
+                initial: serviceRenameText, allowsSlash: true
+            ) { name in
                 if let serviceID = renamingServiceID,
                    let entry = model.indexEntry(serviceID) {
-                    model.rename(entry, to: serviceRenameText)
+                    model.rename(entry, to: name)
                 }
-                renamingServiceID = nil
+                return true
             }
-            Button("Cancel", role: .cancel) { renamingServiceID = nil }
         }
         .alert(
             pendingServiceDelete.count > 1
@@ -1519,7 +1522,8 @@ struct ShellView: View {
 
             if let id = model.selectedEntryID,
                let entry = model.indexEntry(id),
-               entry.kind == .presentation || entry.kind == .media || entry.kind == .audio {
+               entry.kind == .presentation || entry.kind == .media || entry.kind == .audio
+                || entry.kind == .overlay {
                 if entry.kind == .presentation {
                     PresentGridView(
                         model: model, render: render, controls: controls,
@@ -1529,6 +1533,8 @@ struct ShellView: View {
                     .inputRegion("single deck")
                 } else if entry.kind == .media {
                     MediaFireView(model: model, controls: controls, mediaID: entry.id)
+                } else if entry.kind == .overlay {
+                    OverlayFireView(model: model, controls: controls, entry: entry)
                 } else {
 
                     AudioFireView(model: model, controls: controls, audioID: entry.id)

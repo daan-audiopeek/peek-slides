@@ -1,7 +1,7 @@
-# Builds the macOS app on GitHub's Macs and uploads "MxU Slides.app" as a
+# Builds the macOS app on GitHub's Macs and uploads "Peek-Slides.app" as a
 # downloadable zip (Actions tab › latest run › Artifacts).
 #
-# Runs on every push to main, on pull requests, and on demand via
+# Runs on every push (any branch), on pull requests, and on demand via
 # "Run workflow" in the Actions tab. Includes ProPresenter import (types are
 # generated during the build). Built without the optional NDI SDK, so NDI
 # shows as unavailable in the app.
@@ -12,7 +12,6 @@ name: Build macOS app
 
 on:
   push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -80,17 +79,22 @@ jobs:
             -onlyUsePackageVersionsFromResolvedFile \
             MXU_GIT_COMMIT=${{ github.sha }} \
             build 2>&1 | tee build/xcodebuild.log | grep -E 'error:|\*\* BUILD' || true
-          test -d "build/DerivedData/Build/Products/Debug/MxU Slides.app"
+          if [ ! -d "build/DerivedData/Build/Products/Debug/Peek-Slides.app" ]; then
+            # Surface the compiler errors as one annotation on the run page.
+            errors=$(grep -E ' error: ' build/xcodebuild.log | sed "s|$GITHUB_WORKSPACE/||" | sort -u | head -40)
+            echo "::error title=Build failed::${errors//$'\n'/%0A}"
+            exit 1
+          fi
 
       - name: Zip app
         run: |
           cd build/DerivedData/Build/Products/Debug
-          ditto -c -k --sequesterRsrc --keepParent "MxU Slides.app" "$GITHUB_WORKSPACE/MxU-Slides.zip"
+          ditto -c -k --sequesterRsrc --keepParent "Peek-Slides.app" "$GITHUB_WORKSPACE/Peek-Slides.zip"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: MxU-Slides-${{ github.sha }}
-          path: MxU-Slides.zip
+          name: Peek-Slides-${{ github.ref_name }}-${{ github.sha }}
+          path: Peek-Slides.zip
           retention-days: 30
 
       - name: Upload build log on failure
