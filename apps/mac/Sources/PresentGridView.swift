@@ -1532,6 +1532,10 @@ struct SlideTile: View {
             )
             .aspectRatio(aspect, contentMode: .fit)
             .clipShape(tileShape)
+            // Rebuild the thumbnail when the corner style flips: switching an
+            // existing clip between square and rounded inside the lazy grid
+            // left most tiles' content invisible.
+            .id(roundedCorners)
 
             .overlay(alignment: .topLeading) {
                 if showsSectionLabel, let section {
