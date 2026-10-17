@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Peek-Slides app icon, direction A: the Audiopeek peak peeking out of a
+       slide. Rendered to AppIcon.appiconset by scripts/render-app-icon.swift. -->
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="#0B2A33"/>
+  <rect x="226" y="372" width="572" height="322" rx="22" fill="none" stroke="#EEF1F0" stroke-width="26"/>
+  <g fill="#EEF1F0">
+    <rect x="314" y="572" width="36" height="70" rx="12"/>
+    <rect x="374" y="522" width="36" height="120" rx="12"/>
+    <rect x="434" y="462" width="36" height="180" rx="12"/>
+    <rect x="554" y="462" width="36" height="180" rx="12"/>
+    <rect x="614" y="522" width="36" height="120" rx="12"/>
+    <rect x="674" y="572" width="36" height="70" rx="12"/>
+  </g>
+  <rect x="480" y="300" width="64" height="342" rx="12" fill="#0B2A33"/>
+  <rect x="494" y="300" width="36" height="342" rx="12" fill="#3FD7DC"/>
+</svg>
