@@ -67,7 +67,15 @@ struct RunOrderList: View {
             let order = visible.map(\.id)
             let changed = model.versionChangedItemIDs(serviceID)
             VStack(spacing: 0) {
-                runOrderList(service: service, visible: visible, order: order, changed: changed)
+                if visible.isEmpty && !runOnly {
+                    // The run order's table refuses drops while it has no
+                    // rows, so an empty service shows a drop zone instead.
+                    emptyDropZone
+                        .frame(maxHeight: ServiceRunOrder.hidden(service.items).isEmpty ? .infinity : 120)
+                }
+                if !visible.isEmpty || runOnly || !ServiceRunOrder.hidden(service.items).isEmpty {
+                    runOrderList(service: service, visible: visible, order: order, changed: changed)
+                }
                 if !runOnly {
                     Divider()
                     addBar
@@ -184,35 +192,27 @@ struct RunOrderList: View {
             pressedRow: { rowPressed($0, $1, visible: visible) })
         .inputRegion("run order")
         .overlay { ListMarqueeBand(rect: marqueeRect) }
-        // onInsert needs a row to insert next to, so an empty run order takes
-        // drops from the library here instead.
-        .onDrop(of: visible.isEmpty && !runOnly ? [.plainText, .text] : [], isTargeted: $emptyDropTargeted) { providers in
-            for provider in providers {
-                _ = provider.loadObject(ofClass: NSString.self) { object, _ in
-                    guard let payload = object as? String else { return }
-                    Task { @MainActor in
-                        insertPayload(payload, beforeItemID: nil)
-                    }
+    }
+
+    private var emptyDropZone: some View {
+        Text("Drag items from the library here")
+            .font(.callout)
+            .foregroundStyle(emptyDropTargeted ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.tertiary))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background {
+                RoundedRectangle(cornerRadius: 6)
+                    .strokeBorder(
+                        emptyDropTargeted ? Color.accentColor.opacity(0.7) : Color.secondary.opacity(0.25),
+                        style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                    .padding(8)
+            }
+            .contentShape(Rectangle())
+            .dropDestination(for: String.self) { payloads, _ in
+                for payload in payloads {
+                    insertPayload(payload, beforeItemID: nil)
                 }
-            }
-            return true
-        }
-        .overlay {
-            if visible.isEmpty && !runOnly {
-                Text("Drag items from the library here")
-                    .font(.callout)
-                    .foregroundStyle(emptyDropTargeted ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.tertiary))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background {
-                        if emptyDropTargeted {
-                            RoundedRectangle(cornerRadius: 6)
-                                .strokeBorder(Color.accentColor.opacity(0.7), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                                .padding(8)
-                        }
-                    }
-                    .allowsHitTesting(false)
-            }
-        }
+                return !payloads.isEmpty
+            } isTargeted: { emptyDropTargeted = $0 }
     }
 
     private func marqueeBegan(_ modifiers: NSEvent.ModifierFlags) {

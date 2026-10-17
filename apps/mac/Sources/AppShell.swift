@@ -339,6 +339,10 @@ struct ShellView: View {
     @AppStorage("present.continuous") private var continuousPresent = true
 
     @AppStorage("slideGrid.roundedCorners") private var roundedCorners = true
+    @AppStorage("media.directFire") private var directMediaFire = false
+    /// What Present showed before a Direct Fire media pick, so firing media
+    /// from the library keeps the slides on screen.
+    @State private var lastStageEntryID: String?
     @AppStorage("slideGrid.hideScopedBackgrounds") private var hideScopedBackgrounds = false
     @AppStorage("slideGrid.legibleText") private var legibleText = false
     @AppStorage("slideGrid.transparencyGrid") private var transparencyGrid = true
@@ -596,7 +600,14 @@ struct ShellView: View {
                 model.selectedEntryID = nil
             }
         }
+        .onAppear {
+            if !isDirectFireMedia(model.selectedEntryID) { lastStageEntryID = model.selectedEntryID }
+        }
         .onChange(of: model.selectedEntryID) { _, entryID in
+            // Direct Fire media goes live from the library; leave the stage
+            // and the run order selection as they were.
+            if isDirectFireMedia(entryID) { return }
+            lastStageEntryID = entryID
 
             presentFocusScroll.reset()
             if mode == .present, entryID != nil {
@@ -1520,7 +1531,7 @@ struct ShellView: View {
         switch mode {
         case .present:
 
-            if let id = model.selectedEntryID,
+            if let id = presentStageEntryID,
                let entry = model.indexEntry(id),
                entry.kind == .presentation || entry.kind == .media || entry.kind == .audio
                 || entry.kind == .overlay {
@@ -1619,6 +1630,15 @@ struct ShellView: View {
             }
             model.selectedEntryID = entry.id
         }
+    }
+
+    private func isDirectFireMedia(_ entryID: String?) -> Bool {
+        guard directMediaFire, mode == .present, let entryID else { return false }
+        return model.indexEntry(entryID)?.kind == .media
+    }
+
+    private var presentStageEntryID: String? {
+        isDirectFireMedia(model.selectedEntryID) ? lastStageEntryID : model.selectedEntryID
     }
 
     private func adoptSelectedService(_ entryID: String?) {
