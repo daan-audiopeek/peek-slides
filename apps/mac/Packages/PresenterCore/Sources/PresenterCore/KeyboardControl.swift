@@ -131,6 +131,7 @@ public enum KeyCommand: String, Codable, CaseIterable, Sendable {
     case modeScheduler
     case toggleSidebar
     case toggleRightPanels
+    case toggleMediaPool
     case openKeyboardSettings
 
     public var defaultChords: [KeyChord] {
@@ -163,6 +164,7 @@ public enum KeyCommand: String, Codable, CaseIterable, Sendable {
         case .modeScheduler: [KeyChord("3", command: true)]
         case .toggleSidebar: [KeyChord("s", command: true, control: true)]
         case .toggleRightPanels: [KeyChord("r", command: true, control: true)]
+        case .toggleMediaPool: [KeyChord("m", command: true, control: true)]
         case .openKeyboardSettings: [KeyChord("k", option: true)]
         }
     }
@@ -183,7 +185,7 @@ public enum KeyCommand: String, Codable, CaseIterable, Sendable {
         case .boldSelection, .italicSelection, .underlineSelection:
             .editor
         case .modePresent, .modeEdit, .modeScheduler, .toggleSidebar,
-             .toggleRightPanels, .openKeyboardSettings:
+             .toggleRightPanels, .toggleMediaPool, .openKeyboardSettings:
             .application
         }
     }
@@ -200,7 +202,7 @@ public enum KeyCommand: String, Codable, CaseIterable, Sendable {
             .editor
         case .newPresentation, .newSlide, .newService, .newOverlay, .newTheme,
              .findInLibrary, .modePresent, .modeEdit, .modeScheduler,
-             .toggleSidebar, .toggleRightPanels, .openKeyboardSettings:
+             .toggleSidebar, .toggleRightPanels, .toggleMediaPool, .openKeyboardSettings:
             .anywhere
         }
     }
@@ -212,7 +214,7 @@ public enum KeyCommand: String, Codable, CaseIterable, Sendable {
              .clearAll, .clearSlides, .clearMedia, .clearOverlays, .clearAudio,
              .clearAlerts, .clearSignage,
              .videoPlayPause, .videoGoToBeginning,
-             .modePresent, .toggleSidebar, .toggleRightPanels,
+             .modePresent, .toggleSidebar, .toggleRightPanels, .toggleMediaPool,
              .openKeyboardSettings:
             true
         case .newPresentation, .newSlide, .newService, .newOverlay, .newTheme,
@@ -260,6 +262,7 @@ public enum KeyCommand: String, Codable, CaseIterable, Sendable {
         case .modeScheduler: "Go to Scheduler"
         case .toggleSidebar: "Toggle Sidebar"
         case .toggleRightPanels: "Toggle Right Panels"
+        case .toggleMediaPool: "Toggle Media Pool"
         case .openKeyboardSettings: "Open Keyboard Settings"
         }
     }

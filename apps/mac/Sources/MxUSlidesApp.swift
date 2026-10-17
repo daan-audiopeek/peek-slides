@@ -270,6 +270,14 @@ struct MxUSlidesApp: App {
         }
         .defaultSize(width: 360, height: 460)
 
+        Window("Media Pool", id: MediaPool.windowID) {
+            if let appModel {
+                MediaPoolWindowView(model: appModel, controls: controls)
+                    .environment(\.actionRouter, actionRouter)
+            }
+        }
+        .defaultSize(width: 900, height: 320)
+
         Window("Service Controls", id: "serviceControls") {
             if let appModel {
                 ServiceControlsWindowView(

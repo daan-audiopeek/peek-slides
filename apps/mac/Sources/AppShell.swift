@@ -222,6 +222,8 @@ struct ViewCommands: Commands {
     @AppStorage("appMode") private var modeRaw = AppMode.edit.rawValue
     @AppStorage("shell.sidebarVisible") private var sidebarVisible = true
     @AppStorage(PresentLayoutController.rightRailHiddenKey) private var rightRailHidden = false
+    @AppStorage(MediaPool.visibleKey) private var mediaPoolVisible = true
+    @AppStorage(MediaPool.detachedKey) private var mediaPoolDetached = false
     @AppStorage("preview.screenTarget") private var previewTarget = ""
     @Environment(\.openWindow) private var openWindow
 
@@ -258,6 +260,20 @@ struct ViewCommands: Commands {
                 rightRailHidden.toggle()
             }
             .keyboardShortcut(command: .toggleRightPanels)
+
+            Button(mediaPoolVisible && !mediaPoolDetached ? "Hide Media Pool" : "Show Media Pool") {
+                if mediaPoolDetached {
+                    openWindow(id: MediaPool.windowID)
+                } else {
+                    mediaPoolVisible.toggle()
+                }
+            }
+            .keyboardShortcut(command: .toggleMediaPool)
+            Button("Open Media Pool in Window") {
+                mediaPoolVisible = true
+                mediaPoolDetached = true
+                openWindow(id: MediaPool.windowID)
+            }
             Button("Move Right Panels to Windows") {
                 rightRailHidden = true
                 openWindow(id: "preview", value: previewTarget)
@@ -340,6 +356,12 @@ struct ShellView: View {
 
     @AppStorage("slideGrid.roundedCorners") private var roundedCorners = true
     @AppStorage("media.directFire") private var directMediaFire = false
+    @AppStorage(MediaPool.visibleKey) private var mediaPoolVisible = true
+    @AppStorage(MediaPool.detachedKey) private var mediaPoolDetached = false
+    @AppStorage(MediaPool.heightKey) private var mediaPoolHeight = 220.0
+    @State private var draftMediaPoolHeight: CGFloat?
+    @State private var mediaPoolDragStart: CGFloat?
+    @State private var mediaPoolGripHovering = false
     /// What Present showed before a Direct Fire media pick, so firing media
     /// from the library keeps the slides on screen.
     @State private var lastStageEntryID: String?
@@ -602,6 +624,8 @@ struct ShellView: View {
         }
         .onAppear {
             if !isDirectFireMedia(model.selectedEntryID) { lastStageEntryID = model.selectedEntryID }
+            // The media pool window isn't restored at launch, so dock the pool.
+            mediaPoolDetached = false
         }
         .onChange(of: model.selectedEntryID) { _, entryID in
             // Direct Fire media goes live from the library; leave the stage
@@ -1409,10 +1433,21 @@ struct ShellView: View {
 
             }
 
+            if mode == .present, !editorTakesOver, mediaPoolVisible, !mediaPoolDetached {
+                mediaPoolGrip
+                MediaPoolView(model: model, controls: controls)
+                    .frame(height: draftMediaPoolHeight ?? mediaPoolHeight)
+                    .floatingPanel()
+                    .padding(.horizontal, CornerStandard.panelInset)
+                    .inputRegion("media pool")
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
             if mode == .present, !editorTakesOver {
                 presentFooter
             }
         }
+        .animation(.easeOut(duration: 0.15), value: mediaPoolVisible)
 
         .overlay(alignment: .bottom) {
             if mode != .present || editorTakesOver {
@@ -1428,6 +1463,41 @@ struct ShellView: View {
                     .padding(.bottom, 60)
             }
         }
+    }
+
+    /// Drag to resize the docked media pool.
+    private var mediaPoolGrip: some View {
+        ZStack {
+            Color.clear
+            if mediaPoolGripHovering || draftMediaPoolHeight != nil {
+                RoundedRectangle(cornerRadius: 1.5)
+                    .fill(.tertiary.opacity(0.6))
+                    .frame(width: 28, height: 3)
+            }
+        }
+        .frame(height: CornerStandard.panelInset)
+        .contentShape(Rectangle().inset(by: -3))
+        .onHover { inside in
+            mediaPoolGripHovering = inside
+            guard draftMediaPoolHeight == nil else { return }
+            if inside { NSCursor.resizeUpDown.push() } else { NSCursor.pop() }
+        }
+        .gesture(
+            DragGesture(coordinateSpace: .global)
+                .onChanged { value in
+                    let start = mediaPoolDragStart ?? mediaPoolHeight
+                    mediaPoolDragStart = start
+                    draftMediaPoolHeight = min(
+                        max(start - value.translation.height, MediaPool.heightRange.lowerBound),
+                        MediaPool.heightRange.upperBound)
+                }
+                .onEnded { _ in
+                    if let draft = draftMediaPoolHeight { mediaPoolHeight = draft }
+                    draftMediaPoolHeight = nil
+                    mediaPoolDragStart = nil
+                    if !mediaPoolGripHovering { NSCursor.pop() }
+                }
+        )
     }
 
     private var presentFooter: some View {
